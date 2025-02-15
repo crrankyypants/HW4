@@ -6,10 +6,10 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r global, echo= FALSE}
+```{r global, echo= FALSE, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(mosaic)
 
@@ -18,28 +18,41 @@ library(mosaic)
 
 ## **Problem 1 - Iron Bank**
 
-The Securities and Exchange Commission (SEC) is investigating the Iron Bank, where a cluster of employees
-have recently been identified in various suspicious patterns of securities trading that violate federal “insider
-trading” laws. Here are few basic facts about the situation:
-• Of the last 2021 trades by Iron Bank employees, 70 were flagged by the SEC’s detection algorithm.
-• But trades can be flagged every now and again even when no illegal market activity has taken place.
-In fact, the SEC estimates that the baseline probability that any legal trade will be flagged by their
-algorithm is 2.4%.
-• For that reason, the SEC often monitors individual and institutional trading but does not investigate
-incidents that look plausibly consistent with random variability in trading patterns. In other words,
-they won’t investigate unless it seems clear that a cluster of trades is being flagged at a rate significantly
-higher than the baseline rate of 2.4%.
-Are the observed data (70 flagged trades out of 2021) consistent with the SEC’s null hypothesis that, over
-the long run, securities trades from the Iron Bank are flagged at the same 2.4% baseline rate as that of other
-traders?
-Use Monte Carlo simulation (with at least 100000 simulations) to calculate a p-value under this null hypothesis.
-Include the following items in your write-up:
-• the null hypothesis that your are testing;
-• the test statistic you used to measure evidence against the null hypothesis;
-• a plot of the probability distribution of the test statistic, assuming that the null hypothesis is true;
-• the p-value itself;
-• and a one-sentence conclusion about the extent to which you think the null hypothesis looks plausible
-in light of the data. This one is open to interpretation! Make sure to defend your conclusion
+In this problem we are testing if the observed data is consistent with the Securities and Exchange Commissions, null hypothesis that over time security trades from Iron Bank are flagged at the same 2.4% rate as other traders.
+
+**Null Hypothesis**: 2.4 will be our null hypothesis, this number comes from the Iron Bank employees trades that were flagged at this baseline rate of 0.024 compared to other traders.
+
+**Test Statistic**: The number of flagged trades out of 2021 total trades which is 70/2021 = 0.03465
+
+**Monte Carlo Simulation and P-Value**: Simulate 100000 trials where we assume each trade is 2.4% chance of being flagged. So after each trial, it will count how many trades get flagged. Below is the simulation.
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+
+# given and usefull values
+n_trades <- 2021
+null_hypothesis <- 0.024
+observed_flag <- 70 
+
+# monte carlo sim
+sim_results <- do(100000)* rbinom(1, n_trades, null_hypothesis)
+
+p_value <- mean(sim_results$rbinom >= observed_flag)
+
+ggplot(sim_results, aes(x = rbinom,y = ..density..)) + 
+  geom_histogram(fill = "darkgreen", alpha = 0.7, bins = 25)+
+  geom_vline(xintercept = observed_flag, color = "red", linetype = "dashed", size = 1) +
+  labs(title = "Monte Carlo Simulated Distribution of Flagged Trades from SEC", x = "Number of Flagged Trades", y = "Probability Density")+
+  theme_minimal()
+p_value
+
+
+
+
+```
+The graph is bell shaped indicating little variation or skew, but there is a bit of inconsistency in the middle, with seemingly drastic leaps down and then upp again. The p-value we get is `r p_value`, so under the null hypothesis there is only a `r 100*(p_value)`% chance of observing 70 or more flagged trades by random chance. One would argue that this is relatively low number, it is below 0.05 and when you put it in context of the simulation, this means that the idea of being flagged 70 times is very odd, and doesn't or shouldn't happen often under a 2.4% flag rate. 
+
+**Conclusion**: Since the p value is much smaller than 0.05 we have strong evidence to reject the null hypothesis. This value suggests that the flagged trade rate for Iron Bank employees is significantly higher than expected in the regular trading scene. 
 
 ## **Problem 2 - Health Inspections**
 
