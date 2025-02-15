@@ -1,0 +1,64 @@
+---
+title: "HW4"
+author: "Genavieve Middaugh"
+date: "2025-02-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r global, echo= FALSE}
+library(tidyverse)
+library(mosaic)
+
+
+```
+
+## **Problem 1 - Iron Bank**
+
+The Securities and Exchange Commission (SEC) is investigating the Iron Bank, where a cluster of employees
+have recently been identified in various suspicious patterns of securities trading that violate federal “insider
+trading” laws. Here are few basic facts about the situation:
+• Of the last 2021 trades by Iron Bank employees, 70 were flagged by the SEC’s detection algorithm.
+• But trades can be flagged every now and again even when no illegal market activity has taken place.
+In fact, the SEC estimates that the baseline probability that any legal trade will be flagged by their
+algorithm is 2.4%.
+• For that reason, the SEC often monitors individual and institutional trading but does not investigate
+incidents that look plausibly consistent with random variability in trading patterns. In other words,
+they won’t investigate unless it seems clear that a cluster of trades is being flagged at a rate significantly
+higher than the baseline rate of 2.4%.
+Are the observed data (70 flagged trades out of 2021) consistent with the SEC’s null hypothesis that, over
+the long run, securities trades from the Iron Bank are flagged at the same 2.4% baseline rate as that of other
+traders?
+Use Monte Carlo simulation (with at least 100000 simulations) to calculate a p-value under this null hypothesis.
+Include the following items in your write-up:
+• the null hypothesis that your are testing;
+• the test statistic you used to measure evidence against the null hypothesis;
+• a plot of the probability distribution of the test statistic, assuming that the null hypothesis is true;
+• the p-value itself;
+• and a one-sentence conclusion about the extent to which you think the null hypothesis looks plausible
+in light of the data. This one is open to interpretation! Make sure to defend your conclusion
+
+## **Problem 2 - Health Inspections**
+
+The local Health Department is investigating a popular local restaurant chain, Gourmet Bites, after receiving
+a higher-than-usual number of health code violation reports. Here are a few key points about the situation:
+• Over the last year, 1500 health inspections were conducted across various restaurants in the city, with
+various branches of Gourmet Bites inspected a total of 50 times.
+• Of these 50 inspections, 8 resulted in health code violations being reported.
+• Typically, the Health Department’s data shows that, on average, 3% of all restaurant inspections result
+in health code violations due to random issues that can occur even in well-managed establishments.
+The Health Department wants to ensure that any action taken is based on solid evidence that Gourmet Bites’
+rate of health code violations is significantly higher than the citywide average of 3%.
+Question: Are the observed data for Gourmet Bites consistent with the Health Department’s null hypothesis
+that, on average, restaurants in the city are cited for health code violations at the same 3% baseline rate?
+Use a Monte Carlo simulation (with at least 100,000 simulations) to calculate a p-value under this null
+hypothesis. Follow the same answer format as in the prior problem.
+
+
+## **Problem 3 - Evaluating Jury Selection for Bias**
+
+
+
