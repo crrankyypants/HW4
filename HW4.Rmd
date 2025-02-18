@@ -54,24 +54,121 @@ The graph is bell shaped indicating little variation or skew, but there is a bit
 
 **Conclusion**: Since the p value is much smaller than 0.05 we have strong evidence to reject the null hypothesis. This value suggests that the flagged trade rate for Iron Bank employees is significantly higher than expected in the regular trading scene. 
 
+\newpage
 ## **Problem 2 - Health Inspections**
 
-The local Health Department is investigating a popular local restaurant chain, Gourmet Bites, after receiving
-a higher-than-usual number of health code violation reports. Here are a few key points about the situation:
-• Over the last year, 1500 health inspections were conducted across various restaurants in the city, with
-various branches of Gourmet Bites inspected a total of 50 times.
-• Of these 50 inspections, 8 resulted in health code violations being reported.
-• Typically, the Health Department’s data shows that, on average, 3% of all restaurant inspections result
-in health code violations due to random issues that can occur even in well-managed establishments.
 The Health Department wants to ensure that any action taken is based on solid evidence that Gourmet Bites’
 rate of health code violations is significantly higher than the citywide average of 3%.
+In Problem 2 we are looking at a local health department that was investigating gourmet Bites. We know that Gourmet Bites was inspected 50 times out of the 1500 times that inspections were conducted, and we know that 8 of these 50 inspections led to citations. 
+
 Question: Are the observed data for Gourmet Bites consistent with the Health Department’s null hypothesis
 that, on average, restaurants in the city are cited for health code violations at the same 3% baseline rate?
+
+**Hypothesis** null hypothesis is 0.03 restaurants in city are cited for health code violations at same 3% baseline rate
+
+**Test Statistic** the number of health code violations in 50 inspections
+
 Use a Monte Carlo simulation (with at least 100,000 simulations) to calculate a p-value under this null
-hypothesis. Follow the same answer format as in the prior problem.
+hypothesis. 
+
+```{r}
+test_stat <- 50
+null_hypothesis <- 0.03
+observed <- 8
+
+violations_sim <- do(100000) * rbinom(1, size = test_stat, prob = null_hypothesis)
+df_sim <- data.frame(result = violations_sim$rbinom)
+
+p_value <- mean(df_sim$result >= observed)
+
+ggplot(df_sim, aes(x = result)) + geom_histogram(bins = 20, fill = "darkgreen") +
+  geom_vline(xintercept = observed, color = "red", linetype = "dashed", size = 1.2) +
+  labs(title = "Monte Carlo Simulation of resturants cited in a city for health \ncode violations. n = 50",
+       subtitle = paste("Observed Violations =", observed, "| p-value =", round(p_value, 5)),
+       x = "Number of Violations in 50 Inspections", y = "Frequency")
+
+p_value
+
+```
+
+Our graph here is showing the Monte Carlo Simulation ran to simulate 50 of these Gourmet Bites restaurants being inspected and checking if they are cited at a 3% rate. When we compare our observed value of 8 citations out of the 50 inspections the p-value which is the mean of the results from this simulation as long as they are greater than our observed value of 8. That mean comes out to be `r round(p_value,5)`. This value is significantly lower than the basic standard of 0.05, this is suggesting that the 8 citations is out of the 3% range, and suggests that this is strong evidence against the null hypothesis that inspections resulting in citation is 3%.
 
 
 ## **Problem 3 - Evaluating Jury Selection for Bias**
+
+In this problem we are using information known on how jury selection works and information given by the county which anonymized racial and ethnic categories into 5 groups.
+
+breakdown of county eligible jury pool
+
+Group 1  -  30 %
+Group 2  -  25% 
+Group 3  -  20% 
+Group 4  -  15% 
+Group 5  -  10%
+
+Corresponding group counts for em-paneled Jurors in 20 Trials seen by judge (each jury has 12 jurors)
+
+Group 1  - 85
+Group 2  - 56 
+Group 3  - 59 
+Group 4  - 27 
+Group 5  - 13
+
+We want to determine if the distribution of jurors is significantly different from county population proportions. If so does this suggest systematic bias in jury selection? What other explanations might exist, and how could you investigate further?
+
+Do determine this we will be using a Chi-Squared goodness of fit test to find if the distribution of em-paneled jurors is significantly deviant from the expected county proportions. 
+
+**Null Hypothesis** this is the distribution of em-paneled jurors that match the expected distribution from the county jury pool. 
+
+**Alt Hypothesis** The distribution of em-paneled jurors that do not match the expectations from the county jury pool.
+
+
+```{r}
+# Chi-Sqaured problem 
+# hypothesis
+n_jurors <- 12 
+n_trials <- 20 
+total_juror <- n_jurors* n_trials
+observed <- c(85, 56, 59,27,13)
+expected <- total_juror * c(.30, .25, .20, .15, .10)
+expected
+chi_sq_test <- function(obs, exp){
+  chi_squared_stat<-sum((obs - exp)^2 / exp)
+  return(chi_squared_stat)
+}
+
+observed_chi <- chi_sq_test(observed, expected)
+observed_chi
+
+sim_chi <- do(100000) * {
+  simulated_counts <- rbinom(length(observed), size = n_trials, prob = c(.30, .25, .20, .15, .10))
+
+  chi_sq_test(simulated_counts, expected)
+}
+df_chi <- data.frame(chi_stat = sim_chi$result)
+
+p_value <- mean(sim_chi >= observed_chi)
+p_value
+ggplot(df_chi , aes(x = chi_stat)) + geom_histogram(bins = 30, fill = "darkgreen") +
+  geom_vline(xintercept = observed_chi, color = "red", linetype = "dashed", size = 1) +
+  labs(title = "Monte Carlo Simulation of Chi-Squared Statistics ", x = "Chi-Square Stat", y = "Frequency") 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
