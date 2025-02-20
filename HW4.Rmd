@@ -18,6 +18,11 @@ library(kableExtra)
 
 ```
 
+
+Git hub link 
+
+[githubHW](https://github.com/crrankyypants/HW4)
+
 ## **Problem 1 - Iron Bank**
 
 In this problem we are testing if the observed data is consistent with the Securities and Exchange Commissions, null hypothesis that over time security trades from Iron Bank are flagged at the same 2.4% rate as other traders.
@@ -46,7 +51,7 @@ ggplot(sim_results, aes(x = rbinom,y = ..density..)) +
   geom_vline(xintercept = observed_flag, color = "red", linetype = "dashed", size = 1) +
   labs(title = "Monte Carlo Simulated Distribution of Flagged Trades from SEC", x = "Number of Flagged Trades", y = "Probability Density")+
   theme_minimal()
-p_value
+
 
 
 
@@ -89,7 +94,7 @@ ggplot(df_sim, aes(x = result)) + geom_histogram(bins = 20, fill = "darkgreen") 
        subtitle = paste("Observed Violations =", observed, "| p-value =", round(p_value, 5)),
        x = "Number of Violations in 50 Inspections", y = "Frequency")
 
-p_value
+
 
 ```
 
@@ -134,7 +139,7 @@ probs <- c(0.30, 0.25, 0.20, 0.15, 0.10)
 observed <- c(85, 56, 59,27,13)
 total_juror <- sum(observed)
 expected <- total_juror * probs
-expected
+
 
 chi_sq_test <- function(obs, exp){
   chi_squared_stat<-sum((obs - exp)^2 / exp)
@@ -142,7 +147,7 @@ chi_sq_test <- function(obs, exp){
 }
 
 observed_chi <- chi_sq_test(observed, expected)
-observed_chi
+
 
 jury_sim <- do(100000)*{
   simulated_counts <- rmultinom(1, total_juror, probs)
@@ -151,7 +156,7 @@ jury_sim <- do(100000)*{
 df_chi <- data.frame(result = jury_sim$result)
 
 p_value <- mean(jury_sim >= observed_chi)
-p_value
+
 ggplot(df_chi , aes(x = result)) + geom_histogram(binwidth = .5, fill = "darkgreen") +
   geom_vline(xintercept = observed_chi, color = "red", linetype = "dashed", size = 1.2) +
   labs(title = "Monte Carlo Simulation of Chi-Squared Statistics ", x = "Chi-Square Stat", y = "Frequency") 
@@ -223,6 +228,7 @@ calculate_chi_squared = function(sentence, freq_table) {
 
 # collecting chisq stats from all sentences 
 
+
 chi_squared <- sapply(lines, function(sentence){
   calculate_chi_squared(sentence, freq_table = letter_frequencies)
 })
@@ -251,7 +257,6 @@ chi_sq_df <- data.frame(Chi_Squared = chi_squared)
 #6. Compile the distribution: Collect the chi-squared statistics from all sentences to form your reference or null distribution. This distribution represents the range of chi-squared values you might expect to see in normal English sentences based on the predefined letter frequency distribution.
 ggplot(chi_sq_df, aes(x = Chi_Squared)) +
   geom_histogram(binwidth = 1, fill = "darkgreen")+
-  geom_vline(xintercept = observed_chi, color = "red", linetype = "dashed", size = 1.2) +
   labs(title = "Chi - Squared distribution of Sentence letter frequencies", x ="ChiSquared Statistics", y = "Frequency" )
 
 
@@ -260,6 +265,66 @@ ggplot(chi_sq_df, aes(x = Chi_Squared)) +
 This graph suggests that the differences between the observed counts of each letter in each sentence and the expected counts given the data are large. This then can be defined as the range of Chi-Squared values you could expect to see in normal English sentences based on the predefined letter frequency. We will use this for part B.
 
 **Part B: checking for watermark**
+
+
+```{r}
+sentences <- c(
+  "She opened the book and started to read the first chapter, eagerly anticipating what might come next.",
+  "Despite the heavy rain, they decided to go for a long walk in the park, crossing the main avenue by the fountain in the center.",
+  "The museum’s new exhibit features ancient artifacts from various civilizations around the world.",
+  "He carefully examined the document, looking for any clues that might help solve the mystery.",
+  "The students gathered in the auditorium to listen to the guest speaker’s inspiring lecture.",
+  "Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to Auckland.",
+  "The chef demonstrated how to prepare a delicious meal using only locally sourced ingredients, focusing mainly on some excellent dinner recipes from Spain.",
+  "They watched the sunset from the hilltop, marveling at the beautiful array of colors in the sky.",
+  "The committee reviewed the proposal and provided many points of useful feedback to improve the project’s effectiveness.",
+  "Despite the challenges faced during the project, the team worked tirelessly to ensure its successful completion, resulting in a product that exceeded everyone’s expectations."
+)
+
+expected_distribution <- letter_frequencies$Probability / sum(letter_frequencies$Probability)
+expected_distribution <- data.frame(
+  Letter = tolower(letter_frequencies$Letter),  # Ensure lowercase letters
+  Probability = letter_frequencies$Probability / sum(letter_frequencies$Probability)  # Normalize probabilities
+)
+
+letter_freq <- function(sentence){
+  sentence <- tolower(sentence) 
+  sentence <- gsub("[^a-z]", "", sentence) 
+  total_letters = nchar(sentence)
+  observed_counts <- table(factor(strsplit(sentence, "")[[1]], levels = letters))
+  observed_df <- as.data.frame(observed_counts)
+  colnames(observed_df)<- c('Letter', 'Observed')
+  return(observed_df)
+}
+
+compute_chi <- function(sentence){
+  observed_counts <- letter_freq(sentence)
+  
+  # Merge observed with expected distribution
+  merged_data <- merge(observed_counts, expected_distribution, by = "Letter", all.x = TRUE)
+  
+  # Compute expected counts
+  total_observed <- sum(merged_data$Observed)
+  merged_data$Expected <- total_observed * merged_data$Probability
+  
+  # Chi-square test statistic
+  chi_sq_stat <- sum((merged_data$Observed - merged_data$Expected)^2 / merged_data$Expected, na.rm = TRUE)
+  
+  # Compute p-value based on null distribution
+  p_value <- mean(chi_sq_df >= chi_sq_stat)
+  return(p_value)
+}
+
+pvalue <- sapply(sentences, compute_chi)
+
+pvalue_df <- data.frame(Sentence = 1:10, P_Value =pvalue)
+
+kbl(pvalue_df, caption = "Summary of P-Values from 10 Sentences", longtable = TRUE) %>% kable_styling(bootstrap_options = c("striped", "hover", "bordered"))
+
+
+```
+
+After Doing the calculations to get the P-value of each of these sentences based on hte Null distribution above, and the letter frequencies given, we look closely at these values and the lower the Pvalue the more unusual it is. Sentence number 6 is the AI generated sentence with a pvalue of 0.00878 this gives statistically signifigant evidence of sentence number 6 being the LLM sentence and not the English sentence.
 
 
 
